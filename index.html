@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Разработка сайтов под ключ</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', Arial, sans-serif; }
+  html { scroll-behavior: smooth; }
+  body { color: #fff; line-height: 1.6; min-height: 100vh; background: #000; position: relative; overflow-x: hidden; }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -30%;
+    z-index: -2;
+    background:
+      radial-gradient(circle at 20% 25%, #1c1c22 0%, transparent 55%),
+      radial-gradient(circle at 80% 20%, #17171c 0%, transparent 55%),
+      radial-gradient(circle at 75% 80%, #1e1e24 0%, transparent 55%),
+      radial-gradient(circle at 25% 85%, #15151a 0%, transparent 55%);
+    filter: blur(140px);
+    opacity: 0.95;
+    animation: floatBg 45s ease-in-out infinite;
+  }
+
+  @keyframes floatBg {
+    0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    25% { transform: translate(4%, -3%) scale(1.1) rotate(3deg); }
+    50% { transform: translate(-2%, 4%) scale(1.05) rotate(-2deg); }
+    75% { transform: translate(3%, 2%) scale(1.08) rotate(2deg); }
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 36px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.02);
+    position: relative;
+    overflow: hidden;
+    transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .glass::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmer 8s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.9; }
+  }
+
+  .hero { padding: 100px 0 80px; }
+  .hero-inner { padding: 80px 55px; text-align: center; border-radius: 48px; }
+  .hero .tag {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255,255,255,0.9);
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    backdrop-filter: blur(16px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  .hero h1 {
+    font-size: 54px;
+    font-weight: 800;
+    margin-bottom: 26px;
+    line-height: 1.1;
+    letter-spacing: -1.4px;
+    background: linear-gradient(180deg, #fff 0%, #a0a0a8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { font-size: 19px; color: rgba(255,255,255,0.55); margin-bottom: 44px; max-width: 620px; margin-left: auto; margin-right: auto; }
+
+  .btn {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #fff;
+    padding: 18px 46px;
+    border-radius: 24px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 17px;
+    backdrop-filter: blur(18px);
+    transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 12px 36px rgba(0,0,0,0.5);
+    cursor: pointer;
+  }
+  .btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-4px) scale(1.03); box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 22px 50px rgba(0,0,0,0.7); }
+
+  section { padding: 70px 0; }
+
+  h2 {
+    font-size: 40px;
+    text-align: center;
+    margin-bottom: 16px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    background: linear-gradient(180deg, #fff 0%, #9a9aa2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .sub { text-align: center; color: rgba(255,255,255,0.45); font-size: 17px; margin-bottom: 55px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; }
+
+  .card { padding: 42px; border-radius: 36px; }
+  .card:hover { transform: translateY(-10px); background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.16); box-shadow: 0 40px 90px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.2); }
+  .card h3 { font-size: 21px; margin-bottom: 10px; font-weight: 700; }
+  .card p { color: rgba(255,255,255,0.5); margin-bottom: 22px; font-size: 15px; }
+  .price { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.6px; }
+
+  .g-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .g-item { text-align: center; padding: 46px 30px; border-radius: 36px; }
+  .g-item:hover { transform: translateY(-8px); background: rgba(255,255,255,0.06); box-shadow: 0 35px 80px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.18); }
+  .g-icon {
+    width: 72px; height: 72px; margin: 0 auto 22px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 50%;
+    backdrop-filter: blur(18px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 10px 28px rgba(0,0,0,0.45);
+    transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .g-item:hover .g-icon { transform: scale(1.06); background: rgba(255, 255, 255, 0.09); }
+  .g-icon svg { width: 30px; height: 30px; stroke: #fff; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0.9; }
+  .g-item h3 { font-size: 19px; margin-bottom: 8px; font-weight: 700; }
+  .g-item p { color: rgba(255,255,255,0.5); font-size: 14px; }
+
+  .step-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+  .step { text-align: center; padding: 42px 28px; border-radius: 36px; }
+  .step:hover { transform: translateY(-8px); background: rgba(255,255,255,0.06); box-shadow: 0 35px 80px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.18); }
+  .step-num {
+    width: 64px; height: 64px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 800;
+    margin: 0 auto 22px;
+    backdrop-filter: blur(18px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .step h3 { margin-bottom: 8px; font-size: 18px; font-weight: 700; }
+  .step p { color: rgba(255,255,255,0.5); font-size: 14px; }
+
+  /* ФОРМА */
+  .contact-inner { padding: 70px 48px; text-align: center; border-radius: 48px; }
+  .contact-inner h2 { margin-bottom: 18px; }
+  .contact-inner > p { color: rgba(255,255,255,0.55); margin-bottom: 36px; font-size: 17px; }
+
+  .form { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; text-align: left; }
+
+  .form input,
+  .form textarea {
+    width: 100%;
+    padding: 18px 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    color: #fff;
+    font-size: 16px;
+    font-family: inherit;
+    outline: none;
+    backdrop-filter: blur(18px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .form input::placeholder,
+  .form textarea::placeholder { color: rgba(255,255,255,0.35); }
+  .form input:focus,
+  .form textarea:focus { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.28); }
+  .form textarea { resize: vertical; min-height: 120px; font-family: inherit; }
+
+  .form button {
+    padding: 18px 36px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 22px;
+    color: #fff;
+    font-size: 17px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+    backdrop-filter: blur(18px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.16), 0 12px 32px rgba(0,0,0,0.45);
+    transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .form button:hover:not(:disabled) { background: rgba(255,255,255,0.16); transform: translateY(-3px); }
+  .form button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .form-status { text-align: center; font-size: 15px; margin-top: 8px; min-height: 22px; color: rgba(255,255,255,0.7); }
+  .form-status.ok { color: #86efac; }
+  .form-status.err { color: #fca5a5; }
+
+  .tg-link {
+    display: inline-block; margin-top: 28px;
+    color: rgba(255,255,255,0.7); text-decoration: none; font-size: 15px;
+    padding: 12px 26px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .tg-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
+
+  @media (max-width: 600px) {
+    .hero-inner { padding: 50px 28px; border-radius: 36px; }
+    .hero h1 { font-size: 33px; }
+    .hero p { font-size: 16px; }
+    h2 { font-size: 27px; }
+    .card, .g-item, .step, .contact-inner { padding-left: 24px; padding-right: 24px; }
+    .glass { border-radius: 30px; }
+  }
+</style>
+</head>
+<body>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-inner glass">
+        <div class="tag">Работаю с 2025 · 20+ проектов</div>
+        <h1>Сайты, которые продают</h1>
+        <p>Лендинги, магазины и визитки под ключ. Фикс-цена, срок 3–7 дней, гарантия на результат.</p>
+        <a href="#contact" class="btn">Обсудить проект</a>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>Услуги и цены</h2>
+      <p class="sub">Финальные цены — без скрытых доплат</p>
+      <div class="grid">
+        <div class="card glass"><h3>Лендинг</h3><p>Продающая посадочная под услугу или товар. Дизайн, вёрстка, тексты.</p><div class="price">от 25 000 ₽</div></div>
+        <div class="card glass"><h3>Сайт-визитка</h3><p>Аккуратный сайт о компании или специалисте. 3–5 блоков, адаптив.</p><div class="price">от 15 000 ₽</div></div>
+        <div class="card glass"><h3>Интернет-магазин</h3><p>Каталог, корзина, оплата, админка. Под ключ с платежами.</p><div class="price">от 50 000 ₽</div></div>
+        <div class="card glass"><h3>Доработка</h3><p>Правки, ускорение, адаптив, починка чужого сайта.</p><div class="price">от 5 000 ₽</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>Почему я</h2>
+      <p class="sub">Условия, которые снимают риски с тебя</p>
+      <div class="g-grid">
+        <div class="g-item glass">
+          <div class="g-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <h3>Срок 3–7 дней</h3><p>Фиксируем дату сдачи в начале работы.</p>
+        </div>
+        <div class="g-item glass">
+          <div class="g-icon"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <h3>Гарантия 30 дней</h3><p>Бесплатно правлю баги месяц после сдачи.</p>
+        </div>
+        <div class="g-item glass">
+          <div class="g-icon"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10h18"/><circle cx="7" cy="14.5" r="1.2"/></svg></div>
+          <h3>Оплата по этапам</h3><p>50% после макета, 50% после сдачи.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <h2>Как работаем</h2>
+      <p class="sub">Четыре шага от заявки до готового сайта</p>
+      <div class="step-list">
+        <div class="step glass"><div class="step-num">1</div><h3>Заявка</h3><p>Пишешь — задаю вопросы, называю цену.</p></div>
+        <div class="step glass"><div class="step-num">2</div><h3>ТЗ и макет</h3><p>Согласуем структуру и дизайн.</p></div>
+        <div class="step glass"><div class="step-num">3</div><h3>Разработка</h3><p>Делаю за 3–7 дней, показываю прогресс.</p></div>
+        <div class="step glass"><div class="step-num">4</div><h3>Сдача</h3><p>Публикую, подключаю домен, объясняю.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="container">
+      <div class="contact-inner glass">
+        <h2>Обсудим проект?</h2>
+        <p>Оставь заявку — отвечу в течение часа</p>
+
+        <form class="form" id="leadForm">
+          <input type="text" id="name" placeholder="Твоё имя" required>
+          <textarea id="message" placeholder="Что нужно сделать? Опиши задачу" required></textarea>
+          <button type="submit" id="submitBtn">Отправить заявку</button>
+          <div class="form-status" id="status"></div>
+        </form>
+
+        <a href="https://t.me/saiti2026" class="tg-link">Или напиши в Telegram: @saiti2026</a>
+      </div>
+    </div>
+  </section>
+
+<script>
+  // ===== СЮДА ВСТАВЬ СВОИ ДАННЫЕ =====
+  const BOT_TOKEN = '8850043955:AAEqkibytW6kpIxT7dSsRZD4z5m4z4W29Go';
+  const CHAT_ID   = '7587254520';
+  // ====================================
+
+  const form = document.getElementById('leadForm');
+  const btn = document.getElementById('submitBtn');
+  const status = document.getElementById('status');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById('name').value.trim();
+    const message = document.getElementById('message').value.trim();
+    if (!name || !message) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Отправляю...';
+    status.textContent = '';
+    status.className = 'form-status';
+
+    const text = `🔥 Новая заявка с сайта\n\n👤 Имя: ${name}\n💬 Сообщение: ${message}`;
+
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: CHAT_ID, text: text })
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        status.textContent = '✅ Заявка отправлена! Отвечу в течение часа.';
+        status.className = 'form-status ok';
+        form.reset();
+      } else {
+        status.textContent = '❌ Ошибка: ' + (data.description || 'неизвестно');
+        status.className = 'form-status err';
+      }
+    } catch (err) {
+      status.textContent = '❌ Не получилось отправить. Напиши в Telegram: @saiti2026';
+      status.className = 'form-status err';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Отправить заявку';
+    }
+  });
+</script>
+
+</body>
+</html>
