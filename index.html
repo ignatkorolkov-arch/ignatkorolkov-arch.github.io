@@ -3,329 +3,783 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Разработка сайтов под ключ — Игнат Корольков</title>
+<title>IGNAT — Digital Craftsman</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', Arial, sans-serif; }
-  html { scroll-behavior: smooth; }
-  body { color: #fff; line-height: 1.6; min-height: 100vh; background: #000; position: relative; overflow-x: hidden; }
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=JetBrains+Mono:wght@300;400&display=swap');
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: -30%;
-    z-index: -2;
-    background:
-      radial-gradient(circle at 20% 25%, #1c1c22 0%, transparent 55%),
-      radial-gradient(circle at 80% 20%, #17171c 0%, transparent 55%),
-      radial-gradient(circle at 75% 80%, #1e1e24 0%, transparent 55%),
-      radial-gradient(circle at 25% 85%, #15151a 0%, transparent 55%);
-    filter: blur(140px);
-    opacity: 0.95;
-    animation: floatBg 45s ease-in-out infinite;
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #050505;
+    --fg: #f5f5f5;
+    --dim: #6b6b6b;
+    --accent: #e8d5b7;
+    --line: rgba(255,255,255,0.08);
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  @keyframes floatBg {
-    0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-    25% { transform: translate(4%, -3%) scale(1.1) rotate(3deg); }
-    50% { transform: translate(-2%, 4%) scale(1.05) rotate(-2deg); }
-    75% { transform: translate(3%, 2%) scale(1.08) rotate(2deg); }
+  html { scroll-behavior: auto; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+    -webkit-font-smoothing: antialiased;
+    transition: opacity 1s ease;
   }
+  body.loading { overflow: hidden; opacity: 0; }
+  body.ready { opacity: 1; }
 
-  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+  #smooth-wrapper { position: fixed; inset: 0; overflow: hidden; }
+  #smooth-content { position: absolute; top: 0; left: 0; width: 100%; will-change: transform; }
 
-  .glass {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 36px;
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.02);
-    position: relative;
-    overflow: hidden;
-    transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+  .cursor, .cursor-dot {
+    position: fixed; pointer-events: none; z-index: 9999;
+    top: 0; left: 0; mix-blend-mode: difference;
   }
-
-  .glass::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-    animation: shimmer 8s ease-in-out infinite;
+  .cursor {
+    width: 40px; height: 40px;
+    border: 1px solid #fff; border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.7s var(--ease),
+                height 0.7s var(--ease),
+                background 0.7s var(--ease),
+                border-color 0.7s var(--ease);
+    will-change: transform, width, height;
   }
-
-  @keyframes shimmer {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.9; }
+  .cursor-dot {
+    width: 5px; height: 5px; background: #fff;
+    border-radius: 50%; transform: translate(-50%, -50%);
+    transition: width 0.6s var(--ease), height 0.6s var(--ease);
   }
+  .cursor.hover { width: 90px; height: 90px; background: rgba(232,213,183,0.12); border-color: var(--accent); }
+  .cursor.magnetic { width: 120px; height: 120px; background: rgba(232,213,183,0.08); border-color: var(--accent); }
 
-  .hero { padding: 100px 0 80px; }
-  .hero-inner { padding: 80px 55px; text-align: center; border-radius: 48px; }
-  .hero .tag {
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255,255,255,0.9);
-    padding: 10px 24px;
-    border-radius: 50px;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 30px;
-    backdrop-filter: blur(16px);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
-  }
-  .hero h1 {
-    font-size: 54px;
-    font-weight: 800;
-    margin-bottom: 26px;
-    line-height: 1.1;
-    letter-spacing: -1.4px;
-    background: linear-gradient(180deg, #fff 0%, #a0a0a8 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .hero p { font-size: 19px; color: rgba(255,255,255,0.55); margin-bottom: 44px; max-width: 620px; margin-left: auto; margin-right: auto; }
-
-  .btn {
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    color: #fff;
-    padding: 18px 46px;
-    border-radius: 24px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 17px;
-    backdrop-filter: blur(18px);
-    transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.14), 0 12px 36px rgba(0,0,0,0.5);
-    cursor: pointer;
-  }
-  .btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-4px) scale(1.03); box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 22px 50px rgba(0,0,0,0.7); }
-
-  section { padding: 70px 0; }
-
-  h2 {
-    font-size: 40px;
-    text-align: center;
-    margin-bottom: 16px;
-    font-weight: 800;
-    letter-spacing: -0.8px;
-    background: linear-gradient(180deg, #fff 0%, #9a9aa2 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-  .sub { text-align: center; color: rgba(255,255,255,0.45); font-size: 17px; margin-bottom: 55px; }
-
-  .about-inner { padding: 55px 50px; border-radius: 40px; }
-  .about-inner p { color: rgba(255,255,255,0.7); font-size: 17px; margin-bottom: 18px; }
-  .about-inner p:last-child { margin-bottom: 0; }
-  .about-inner strong { color: #fff; }
-
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; }
-
-  .card { padding: 42px; border-radius: 36px; }
-  .card:hover { transform: translateY(-10px); background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.16); box-shadow: 0 40px 90px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.2); }
-  .card h3 { font-size: 21px; margin-bottom: 10px; font-weight: 700; }
-  .card p { color: rgba(255,255,255,0.5); margin-bottom: 22px; font-size: 15px; }
-  .price { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.6px; }
-
-  .inc-list { max-width: 800px; margin: 0 auto; display: grid; gap: 14px; }
-  .inc-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 22px 28px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 24px;
-    backdrop-filter: blur(20px);
-    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  .inc-item:hover { background: rgba(255,255,255,0.06); transform: translateX(6px); }
-  .inc-item .check {
-    flex-shrink: 0;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
+  .preloader {
+    position: fixed; inset: 0; background: #000; z-index: 10000;
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
+    transition: opacity 1s ease, visibility 1s ease;
   }
-  .inc-item p { color: rgba(255,255,255,0.75); font-size: 16px; }
-  .inc-item p strong { color: #fff; }
+  .preloader.hide { opacity: 0; visibility: hidden; }
+  .preloader-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.3em;
+    color: var(--dim); text-transform: uppercase;
+  }
+  .preloader-text span { color: var(--fg); }
 
-  .faq { max-width: 800px; margin: 0 auto; display: grid; gap: 14px; }
+  #bg-canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.7; }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    padding: 32px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 100; mix-blend-mode: difference;
+  }
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; letter-spacing: 0.2em; font-weight: 500;
+  }
+  .logo::before { content: '● '; color: var(--accent); }
+  .nav-links {
+    display: flex; gap: 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  }
+  .nav-links a { color: var(--fg); text-decoration: none; position: relative; padding: 4px 0; }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: 0; left: 0;
+    width: 0; height: 1px; background: var(--fg);
+    transition: width 0.7s var(--ease);
+  }
+  .nav-links a:hover::after { width: 100%; }
+
+  section { padding: 160px 48px; position: relative; }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.3em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 60px; display: flex; align-items: center; gap: 16px;
+  }
+  .section-label::before { content: ''; width: 30px; height: 1px; background: var(--accent); }
+
+  .hero {
+    min-height: 100vh;
+    padding: 140px 48px 60px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    position: relative;
+  }
+  .hero-top {
+    display: flex; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--dim);
+  }
+  .hero-title {
+    font-size: clamp(60px, 12vw, 200px);
+    font-weight: 300; line-height: 0.9;
+    letter-spacing: -0.04em; margin: 40px 0;
+    position: relative; z-index: 2;
+  }
+  .hero-title .line { display: block; overflow: hidden; }
+  .hero-title .line span {
+    display: inline-block; transform: translateY(110%);
+    animation: revealUp 1.4s var(--ease) forwards;
+  }
+  .hero-title .line:nth-child(2) span { animation-delay: 0.1s; }
+  .hero-title .line:nth-child(3) span { animation-delay: 0.2s; }
+  .hero-title .italic { font-style: italic; font-weight: 400; color: var(--accent); }
+  @keyframes revealUp { to { transform: translateY(0); } }
+
+  .hero-bottom {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    gap: 40px; position: relative; z-index: 2;
+  }
+  .hero-desc { max-width: 420px; font-size: 15px; line-height: 1.6; color: var(--dim); }
+  .hero-desc strong { color: var(--fg); font-weight: 400; }
+
+  .scroll-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--dim); display: flex; align-items: center; gap: 12px;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  .scroll-hint::after { content: ''; width: 40px; height: 1px; background: var(--dim); }
+  @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  .cube-wrap {
+    position: absolute;
+    top: 50%; right: 6%;
+    width: 260px; height: 260px;
+    transform: translateY(-50%);
+    perspective: 1000px;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .cube {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+  .cube-face {
+    position: absolute;
+    width: 260px; height: 260px;
+    border: 1px solid rgba(232,213,183,0.35);
+    background: rgba(232,213,183,0.02);
+    backdrop-filter: blur(6px);
+    box-shadow: inset 0 0 40px rgba(232,213,183,0.05);
+  }
+  .cube-face:nth-child(1) { transform: translateZ(130px); }
+  .cube-face:nth-child(2) { transform: rotateY(180deg) translateZ(130px); }
+  .cube-face:nth-child(3) { transform: rotateY(90deg) translateZ(130px); }
+  .cube-face:nth-child(4) { transform: rotateY(-90deg) translateZ(130px); }
+  .cube-face:nth-child(5) { transform: rotateX(90deg) translateZ(130px); }
+  .cube-face:nth-child(6) { transform: rotateX(-90deg) translateZ(130px); }
+  @media (max-width: 900px) { .cube-wrap { display: none; } }
+
+  .manifesto-text {
+    font-size: clamp(24px, 3.4vw, 52px);
+    font-weight: 300; line-height: 1.25;
+    letter-spacing: -0.02em; max-width: 1200px;
+  }
+  .manifesto-text .word {
+    display: inline-block; opacity: 0.15;
+    transition: opacity 0.9s var(--ease), color 0.9s var(--ease);
+  }
+  .manifesto-text .word.active { opacity: 1; }
+  .manifesto-text .word.accent { color: var(--accent); }
+
+  .about-text {
+    margin-top: 60px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 40px;
+    max-width: 1200px;
+  }
+  .about-text p { color: var(--dim); font-size: 16px; line-height: 1.7; }
+  .about-text p strong { color: var(--fg); font-weight: 400; }
+
+  .services-header {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 80px; flex-wrap: wrap; gap: 20px;
+  }
+  .services-title {
+    font-size: clamp(48px, 7vw, 110px);
+    font-weight: 300; letter-spacing: -0.03em; line-height: 1;
+  }
+  .services-title em { font-style: italic; color: var(--accent); }
+  .services-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.2em; color: var(--dim);
+  }
+
+  .services-list { display: flex; flex-direction: column; }
+
+  .service-item {
+    position: relative;
+    padding: 40px 0;
+    border-top: 1px solid var(--line);
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 80px 1fr auto auto;
+    align-items: center;
+    gap: 40px;
+    transition: padding 1.2s var(--ease), border-color 1.2s var(--ease);
+    overflow: hidden;
+  }
+  .service-item:last-child { border-bottom: 1px solid var(--line); }
+  .service-item:hover {
+    padding-left: 30px;
+    border-color: rgba(232,213,183,0.25);
+  }
+  .service-item::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(232,213,183,0.06), transparent 60%);
+    transform: translateX(-100%);
+    transition: transform 1.4s var(--ease);
+  }
+  .service-item:hover::before { transform: translateX(0); }
+
+  .service-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: var(--dim);
+    position: relative;
+    transition: color 0.9s var(--ease);
+  }
+  .service-item:hover .service-num { color: var(--accent); }
+
+  .service-name {
+    font-size: clamp(24px, 3vw, 44px);
+    font-weight: 300; letter-spacing: -0.02em;
+    position: relative;
+    transition: color 1.2s var(--ease), transform 1.2s var(--ease);
+  }
+  .service-item:hover .service-name {
+    color: var(--accent);
+    transform: translateX(8px);
+  }
+
+  .service-desc {
+    font-size: 14px; color: var(--dim);
+    max-width: 320px; position: relative;
+    transition: color 1.2s var(--ease);
+  }
+  .service-item:hover .service-desc { color: rgba(255,255,255,0.85); }
+
+  .service-price {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; color: var(--fg);
+    position: relative; white-space: nowrap;
+    transition: transform 1.2s var(--ease), color 1.2s var(--ease);
+  }
+  .service-item:hover .service-price {
+    color: var(--accent);
+    transform: translateX(-8px);
+  }
+
+  .inc-list {
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 16px;
+  }
+  .inc-item {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 22px 26px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    transition: background 1.2s var(--ease),
+                border-color 1.2s var(--ease),
+                transform 1.2s var(--ease),
+                padding 1.2s var(--ease);
+  }
+  .inc-item:hover {
+    background: rgba(232,213,183,0.04);
+    border-color: rgba(232,213,183,0.2);
+    transform: translateX(8px);
+    padding-left: 34px;
+  }
+  .inc-check {
+    flex-shrink: 0; width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); font-size: 12px;
+    transition: background 1.2s var(--ease), color 1.2s var(--ease);
+  }
+  .inc-item:hover .inc-check {
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .inc-item p { color: rgba(255,255,255,0.75); font-size: 15px; }
+  .inc-item p strong { color: var(--fg); font-weight: 400; }
+
+  .faq { max-width: 900px; display: grid; gap: 14px; }
   .faq-item {
     padding: 26px 30px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 24px;
-    backdrop-filter: blur(20px);
-    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: rgba(255,255,255,0.02);
+    transition: background 1.2s var(--ease),
+                border-color 1.2s var(--ease),
+                padding 1.2s var(--ease);
+    cursor: pointer;
   }
-  .faq-item:hover { background: rgba(255,255,255,0.06); }
-  .faq-item h4 { font-size: 17px; margin-bottom: 10px; font-weight: 600; }
-  .faq-item p { color: rgba(255,255,255,0.6); font-size: 15px; }
+  .faq-item:hover {
+    background: rgba(232,213,183,0.04);
+    border-color: rgba(232,213,183,0.25);
+    padding-left: 44px;
+  }
+  .faq-item h4 {
+    font-size: 17px; margin-bottom: 12px; font-weight: 400;
+    transition: color 1s var(--ease);
+  }
+  .faq-item:hover h4 { color: var(--accent); }
+  .faq-item p { color: var(--dim); font-size: 15px; line-height: 1.6; }
 
-  .works-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
-  .work {
-    aspect-ratio: 16/10;
-    border-radius: 32px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    backdrop-filter: blur(20px);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 14px;
-    color: rgba(255,255,255,0.4);
-    font-size: 15px;
-    text-align: center;
-    padding: 30px;
-    transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  .numbers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 60px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 100px 0;
   }
-  .work:hover { transform: translateY(-6px); background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); }
-  .work-icon { font-size: 36px; opacity: 0.5; }
+  .number-value {
+    font-size: clamp(48px, 6vw, 96px);
+    font-weight: 300; letter-spacing: -0.04em;
+    color: var(--accent); line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .number-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--dim); margin-top: 16px;
+  }
 
-  .contact-inner { padding: 70px 48px; text-align: center; border-radius: 48px; }
-  .contact-inner h2 { margin-bottom: 18px; }
-  .contact-inner > p { color: rgba(255,255,255,0.55); margin-bottom: 40px; font-size: 17px; }
-  .contact-links { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-  .contact-links a {
-    color: #fff; text-decoration: none;
-    padding: 18px 38px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.14);
-    border-radius: 24px;
-    transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
-    font-weight: 600;
-    font-size: 16px;
-    backdrop-filter: blur(18px);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  .cta { text-align: center; padding: 200px 48px; position: relative; }
+  .cta-title {
+    font-size: clamp(60px, 12vw, 200px);
+    font-weight: 300; line-height: 0.9;
+    letter-spacing: -0.04em; margin-bottom: 60px;
   }
-  .contact-links a span { font-size: 13px; color: rgba(255,255,255,0.5); font-weight: 400; }
-  .contact-links a:hover {
-    background: rgba(255,255,255,0.15);
-    transform: translateY(-4px) scale(1.03);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 22px 50px rgba(0,0,0,0.6);
-  }
-  .contact-links a:hover span { color: rgba(255,255,255,0.7); }
+  .cta-title em { font-style: italic; color: var(--accent); }
+  .cta-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
 
-  @media (max-width: 600px) {
-    .hero-inner { padding: 50px 28px; border-radius: 36px; }
-    .hero h1 { font-size: 33px; }
-    .hero p { font-size: 16px; }
-    h2 { font-size: 27px; }
-    .card, .contact-inner, .about-inner { padding-left: 26px; padding-right: 26px; }
-    .glass { border-radius: 30px; }
-    .inc-item { padding: 18px 22px; }
-    .faq-item { padding: 22px 24px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 22px 44px;
+    border: 1px solid var(--line); border-radius: 100px;
+    text-decoration: none; color: var(--fg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
+    transition: transform 1.2s var(--ease),
+                background 1.2s var(--ease),
+                color 1.2s var(--ease),
+                border-color 1.2s var(--ease);
+    background: transparent;
+    will-change: transform;
+  }
+  .btn:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .btn-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .btn-primary:hover { background: var(--fg); border-color: var(--fg); }
+
+  footer {
+    padding: 60px 48px 40px;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--dim);
+  }
+
+  .reveal {
+    opacity: 0; transform: translateY(60px);
+    transition: opacity 1.4s var(--ease), transform 1.4s var(--ease);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    body { cursor: auto; }
+    .cursor, .cursor-dot { display: none; }
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    .hero, section, .cta { padding-left: 24px; padding-right: 24px; }
+    .hero { padding-top: 100px; }
+    .service-item { grid-template-columns: 40px 1fr; gap: 16px; }
+    .service-desc, .service-price { grid-column: 2; }
+    footer { padding: 40px 24px 30px; }
   }
 </style>
 </head>
-<body>
+<body class="loading">
+
+  <div class="cursor"></div>
+  <div class="cursor-dot"></div>
+
+  <div class="preloader" id="preloader">
+    <div class="preloader-text">Loading <span id="loadPct">0</span>%</div>
+  </div>
+
+  <canvas id="bg-canvas"></canvas>
+
+  <nav>
+    <div class="logo">IGNAT.K</div>
+    <div class="nav-links">
+      <a href="#manifesto">Обо мне</a>
+      <a href="#services">Услуги</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Контакт</a>
+    </div>
+  </nav>
+
+  <div id="smooth-wrapper">
+   <div id="smooth-content">
 
   <section class="hero">
-    <div class="container">
-      <div class="hero-inner glass">
-        <div class="tag">Разработка сайтов · с 2025 года</div>
-        <h1>Сайты, которые продают</h1>
-        <p>Делаю лендинги, магазины и корпоративные сайты под ключ. Фиксированная цена, срок 3–7 дней, поддержка после сдачи.</p>
-        <a href="#services" class="btn">Узнать больше</a>
+    <div class="hero-top">
+      <span>Digital Craftsman / Est. 2025</span>
+      <span>Moscow · Remote</span>
+    </div>
+    <h1 class="hero-title">
+      <span class="line"><span>Сайты,</span></span>
+      <span class="line"><span>которые</span></span>
+      <span class="line"><span class="italic">продают.</span></span>
+    </h1>
+    <div class="cube-wrap">
+      <div class="cube" id="cube">
+        <div class="cube-face"></div>
+        <div class="cube-face"></div>
+        <div class="cube-face"></div>
+        <div class="cube-face"></div>
+        <div class="cube-face"></div>
+        <div class="cube-face"></div>
       </div>
+    </div>
+    <div class="hero-bottom">
+      <p class="hero-desc">
+        Разработка сайтов под ключ — <strong>лендинги, визитки, интернет-магазины</strong>.
+        Дизайн, вёрстка, тексты, подключение. Лично веду каждый проект.
+      </p>
+      <div class="scroll-hint">Scroll</div>
     </div>
   </section>
 
-  <section>
-    <div class="container">
-      <div class="about-inner glass">
-        <h2>Обо мне</h2>
-        <p class="sub" style="margin-bottom:30px;">Немного о том, кто будет делать ваш сайт</p>
-        <p>Меня зовут <strong>Игнат</strong>. Я занимаюсь разработкой сайтов и помогаю малому бизнесу и специалистам получить работающий инструмент для привлечения клиентов — без переплат студиям и без шаблонных решений, которые «есть, но не работают».</p>
-        <p>Начинал с простых визиток и лендингов, сейчас делаю интернет-магазины и корпоративные сайты. Работаю с <strong>дизайном, вёрсткой, текстами и подключением</strong> — вам не нужно искать отдельного дизайнера или копирайтера, всё делаю сам.</p>
-        <p>Каждый проект веду лично: обсуждаем задачу, согласовываем макет, делаю, показываю, сдаю. Никаких «менеджеров» и потерянных заявок. Если что-то непонятно — на связи в Telegram, отвечаю в течение часа.</p>
-      </div>
+  <section id="manifesto">
+    <div class="section-label">01 / Обо мне</div>
+    <p class="manifesto-text" id="manifesto-text">
+      Меня зовут Игнат. Я делаю сайты, которые работают: приносят заявки, продают, запоминаются. Без шаблонов, без воды, без «как у всех». Каждый проект веду лично — от идеи до запуска.
+    </p>
+    <div class="about-text">
+      <p>Начинал с простых визиток и лендингов, сейчас делаю <strong>интернет-магазины</strong> и корпоративные сайты. Работаю с дизайном, вёрсткой, текстами и подключением — вам не нужно искать отдельного дизайнера или копирайтера, всё делаю сам.</p>
+      <p>Каждый проект веду лично: обсуждаем задачу, согласовываем макет, делаю, показываю, сдаю. <strong>Никаких «менеджеров»</strong> и потерянных заявок. Если что-то непонятно — на связи в Telegram, отвечаю в течение часа.</p>
     </div>
   </section>
 
   <section id="services">
-    <div class="container">
-      <h2>Услуги и цены</h2>
-      <p class="sub">Финальные цены — без скрытых доплат</p>
-      <div class="grid">
-        <div class="card glass"><h3>Лендинг</h3><p>Продающая посадочная под услугу или товар. Дизайн, вёрстка, тексты.</p><div class="price">от 25 000 ₽</div></div>
-        <div class="card glass"><h3>Сайт-визитка</h3><p>Аккуратный сайт о компании или специалисте. 3–5 блоков, адаптив.</p><div class="price">от 15 000 ₽</div></div>
-        <div class="card glass"><h3>Интернет-магазин</h3><p>Каталог, корзина, оплата, админка. Под ключ с платежами.</p><div class="price">от 50 000 ₽</div></div>
-        <div class="card glass"><h3>Доработка</h3><p>Правки, ускорение, адаптив, починка чужого сайта.</p><div class="price">от 5 000 ₽</div></div>
+    <div class="section-label">02 / Услуги</div>
+    <div class="services-header">
+      <h2 class="services-title">Что я <em>делаю</em></h2>
+      <div class="services-count">[ 04 услуги ]</div>
+    </div>
+    <div class="services-list">
+      <div class="service-item reveal">
+        <div class="service-num">01</div>
+        <div class="service-name">Лендинг</div>
+        <div class="service-desc">Продающая посадочная под услугу или товар. Дизайн, вёрстка, тексты.</div>
+        <div class="service-price">от 25 000 ₽</div>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-num">02</div>
+        <div class="service-name">Сайт-визитка</div>
+        <div class="service-desc">Аккуратный сайт о компании или специалисте. 3–5 блоков, адаптив.</div>
+        <div class="service-price">от 15 000 ₽</div>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-num">03</div>
+        <div class="service-name">Интернет-магазин</div>
+        <div class="service-desc">Каталог, корзина, оплата, админка. Под ключ с платежами.</div>
+        <div class="service-price">от 50 000 ₽</div>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-num">04</div>
+        <div class="service-name">Доработка</div>
+        <div class="service-desc">Правки, ускорение, адаптив, починка чужого сайта.</div>
+        <div class="service-price">от 5 000 ₽</div>
       </div>
     </div>
   </section>
 
   <section>
-    <div class="container">
-      <h2>Что входит в стоимость</h2>
-      <p class="sub">Всё, что нужно для запуска — уже в цене</p>
-      <div class="inc-list">
-        <div class="inc-item"><div class="check">✓</div><p><strong>Дизайн</strong> — под ваш бизнес и аудиторию, без шаблонов</p></div>
-        <div class="inc-item"><div class="check">✓</div><p><strong>Вёрстка и адаптив</strong> — сайт корректно работает на телефоне, планшете, компьютере</p></div>
-        <div class="inc-item"><div class="check">✓</div><p><strong>Тексты</strong> — пишу сам, не «рыба» из интернета</p></div>
-        <div class="inc-item"><div class="check">✓</div><p><strong>Подключение домена и хостинга</strong> — помогу выбрать и настроить</p></div>
-        <div class="inc-item"><div class="check">✓</div><p><strong>Формы связи</strong> — Telegram, WhatsApp, почта, кнопка «Позвонить»</p></div>
-        <div class="inc-item"><div class="check">✓</div><p><strong>Базовое SEO</strong> — заголовки, мета-теги, скорость загрузки</p></div>
-        <div class="inc-item"><div class="check">✓</div><p><strong>Обучение</strong> — покажу, как пользоваться админкой и что делать дальше</p></div>
-        <div class="inc-item"><div class="check">✓</div><p><strong>Поддержка 30 дней</strong> — правлю баги и мелочи бесплатно</p></div>
-      </div>
+    <div class="section-label">03 / Что входит</div>
+    <div class="services-header">
+      <h2 class="services-title">Всё <em>включено</em></h2>
+      <div class="services-count">[ 08 пунктов ]</div>
+    </div>
+    <div class="inc-list">
+      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Дизайн</strong> — под ваш бизнес и аудиторию, без шаблонов</p></div>
+      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Вёрстка и адаптив</strong> — на телефоне, планшете, компьютере</p></div>
+      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Тексты</strong> — пишу сам, не «рыба» из интернета</p></div>
+      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Домен и хостинг</strong> — помогу выбрать и настроить</p></div>
+      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Формы связи</strong> — Telegram, WhatsApp, почта, звонок</p></div>
+      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Базовое SEO</strong> — заголовки, мета-теги, скорость</p></div>
+      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Обучение</strong> — покажу, как пользоваться админкой</p></div>
+      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Поддержка 30 дней</strong> — правлю баги бесплатно</p></div>
     </div>
   </section>
 
   <section>
-    <div class="container">
-      <h2>Частые вопросы</h2>
-      <p class="sub">Коротко о том, что обычно спрашивают</p>
-      <div class="faq">
-        <div class="faq-item"><h4>Сколько времени занимает разработка?</h4><p>Визитка — 2–3 дня. Лендинг — 3–5 дней. Интернет-магазин — от 7 дней. Точный срок называю после обсуждения задачи.</p></div>
-        <div class="faq-item"><h4>Как проходит оплата?</h4><p>50% после согласования макета, 50% после сдачи готового сайта. Никакой предоплаты «в никуда».</p></div>
-        <div class="faq-item"><h4>Что нужно от меня?</h4><p>Рассказать о задаче и бизнесе, дать материалы (логотип, фото, тексты — если есть). Остальное сделаю сам.</p></div>
-        <div class="faq-item"><h4>Смогу ли я сам редактировать сайт?</h4><p>Да. Для простых сайтов ставлю удобную админку — сможете менять тексты, фото, цены без программиста.</p></div>
-        <div class="faq-item"><h4>Что если сайт не понравится?</h4><p>Согласовываем макет до старта работ. Пока макет не утверждён — правки бесплатны и в любом количестве.</p></div>
-        <div class="faq-item"><h4>Помогаете с доменом и хостингом?</h4><p>Да. Подскажу, что выбрать под ваш бюджет, помогу зарегистрировать и подключить. Обычно это 500–1500 ₽ в год за домен и 100–300 ₽/мес за хостинг.</p></div>
+    <div class="numbers">
+      <div class="number-item">
+        <div class="number-value" data-target="20">0</div>
+        <div class="number-label">Проектов</div>
+      </div>
+      <div class="number-item">
+        <div class="number-value" data-target="7">0</div>
+        <div class="number-label">Дней макс. срок</div>
+      </div>
+      <div class="number-item">
+        <div class="number-value" data-target="30">0</div>
+        <div class="number-label">Дней поддержки</div>
+      </div>
+      <div class="number-item">
+        <div class="number-value" data-target="100">0</div>
+        <div class="number-label">% ручная работа</div>
       </div>
     </div>
   </section>
 
-  <section>
-    <div class="container">
-      <h2>Примеры работ</h2>
-      <p class="sub">Скоро здесь появятся готовые проекты</p>
-      <div class="works-grid">
-        <div class="work"><div class="work-icon">🌐</div><p>Лендинг для студии<br>загрузка...</p></div>
-        <div class="work"><div class="work-icon">🛒</div><p>Интернет-магазин<br>загрузка...</p></div>
-        <div class="work"><div class="work-icon">💼</div><p>Корпоративный сайт<br>загрузка...</p></div>
-      </div>
+  <section id="faq">
+    <div class="section-label">04 / FAQ</div>
+    <div class="services-header">
+      <h2 class="services-title">Частые <em>вопросы</em></h2>
+    </div>
+    <div class="faq">
+      <div class="faq-item reveal"><h4>Сколько времени занимает разработка?</h4><p>Визитка — 2–3 дня. Лендинг — 3–5 дней. Интернет-магазин — от 7 дней. Точный срок называю после обсуждения задачи.</p></div>
+      <div class="faq-item reveal"><h4>Как проходит оплата?</h4><p>50% после согласования макета, 50% после сдачи готового сайта. Никакой предоплаты «в никуда».</p></div>
+      <div class="faq-item reveal"><h4>Что нужно от меня?</h4><p>Рассказать о задаче и бизнесе, дать материалы (логотип, фото, тексты — если есть). Остальное сделаю сам.</p></div>
+      <div class="faq-item reveal"><h4>Смогу ли я сам редактировать сайт?</h4><p>Да. Для простых сайтов ставлю удобную админку — сможете менять тексты, фото, цены без программиста.</p></div>
+      <div class="faq-item reveal"><h4>Что если сайт не понравится?</h4><p>Согласовываем макет до старта работ. Пока макет не утверждён — правки бесплатны и в любом количестве.</p></div>
+      <div class="faq-item reveal"><h4>Помогаете с доменом и хостингом?</h4><p>Да. Подскажу, что выбрать под ваш бюджет, помогу зарегистрировать и подключить. Обычно это 500–1500 ₽ в год за домен и 100–300 ₽/мес за хостинг.</p></div>
     </div>
   </section>
 
-  <section id="contact">
-    <div class="container">
-      <div class="contact-inner glass">
-        <h2>Обсудим проект?</h2>
-        <p>Напишите удобным способом — отвечу в течение часа</p>
-        <div class="contact-links">
-          <a href="https://t.me/saiti45675328_bot">
-            🤖 Написать боту
-            <span>автоответ, заявка придёт мне</span>
-          </a>
-          <a href="https://t.me/saiti2026">
-            💬 Написать напрямую
-            <span>Telegram: @saiti2026</span>
-          </a>
-        </div>
-      </div>
+  <section class="cta" id="contact">
+    <h2 class="cta-title">Обсудим<br><em>проект?</em></h2>
+    <div class="cta-buttons">
+      <a href="https://t.me/saiti45675328_bot" class="btn btn-primary" data-magnetic>→ Написать боту</a>
+      <a href="https://t.me/saiti2026" class="btn" data-magnetic>→ Telegram @saiti2026</a>
     </div>
   </section>
+
+  <footer>
+    <div>© 2025 Ignat K. — Digital Craftsman</div>
+    <div>Made with intent</div>
+  </footer>
+
+   </div>
+  </div>
+
+<script>
+let pct = 0;
+const pctEl = document.getElementById('loadPct');
+const preloader = document.getElementById('preloader');
+const body = document.body;
+const interval = setInterval(() => {
+  pct += Math.random() * 15;
+  if (pct >= 100) {
+    pct = 100;
+    clearInterval(interval);
+    setTimeout(() => {
+      preloader.classList.add('hide');
+      body.classList.remove('loading');
+      body.classList.add('ready');
+      initSmoothScroll();
+    }, 400);
+  }
+  pctEl.textContent = Math.floor(pct);
+}, 100);
+
+const cursor = document.querySelector('.cursor');
+const cursorDot = document.querySelector('.cursor-dot');
+let mx = 0, my = 0, cx = 0, cy = 0, dotX = 0, dotY = 0;
+
+document.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+
+function animateCursor() {
+  cx += (mx - cx) * 0.12;
+  cy += (my - cy) * 0.12;
+  dotX += (mx - dotX) * 0.28;
+  dotY += (my - dotY) * 0.28;
+  cursor.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
+  cursorDot.style.transform = `translate(${dotX}px, ${dotY}px) translate(-50%, -50%)`;
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+document.querySelectorAll('a, .service-item, .faq-item, .inc-item').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.classList.add('hover');
+    cursorDot.style.width = '12px';
+    cursorDot.style.height = '12px';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.classList.remove('hover');
+    cursorDot.style.width = '5px';
+    cursorDot.style.height = '5px';
+  });
+});
+
+document.querySelectorAll('[data-magnetic]').forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    btn.style.transform = `translate(${x * 0.25}px, ${y * 0.4}px)`;
+  });
+  btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
+  btn.addEventListener('mouseenter', () => cursor.classList.add('magnetic'));
+  btn.addEventListener('mouseleave', () => cursor.classList.remove('magnetic'));
+});
+
+let smoothScrollY = 0;
+let targetScrollY = 0;
+const smoothContent = document.getElementById('smooth-content');
+let contentHeight = 0;
+
+function recalcHeight() {
+  contentHeight = smoothContent.scrollHeight;
+  document.body.style.height = contentHeight + 'px';
+}
+
+function initSmoothScroll() {
+  recalcHeight();
+  window.addEventListener('resize', recalcHeight);
+  window.addEventListener('scroll', () => { targetScrollY = window.scrollY; }, { passive: true });
+  smoothLoop();
+}
+
+function smoothLoop() {
+  smoothScrollY += (targetScrollY - smoothScrollY) * 0.08;
+  if (Math.abs(targetScrollY - smoothScrollY) < 0.05) smoothScrollY = targetScrollY;
+  smoothContent.style.transform = `translate3d(0, ${-smoothScrollY}px, 0)`;
+  requestAnimationFrame(smoothLoop);
+}
+
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let W, H;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const PARTICLE_COUNT = window.innerWidth < 768 ? 30 : 80;
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  particles.push({
+    x: Math.random() * W, y: Math.random() * H,
+    vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25,
+    r: Math.random() * 1.4 + 0.3
+  });
+}
+
+function drawParticles() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(232, 213, 183, 0.5)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+  particles.forEach((p, i) => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > W) p.vx *= -1;
+    if (p.y < 0 || p.y > H) p.vy *= -1;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+    for (let j = i + 1; j < particles.length; j++) {
+      const q = particles[j];
+      const dx = p.x - q.x, dy = p.y - q.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist < 110) {
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(q.x, q.y);
+        ctx.stroke();
+      }
+    }
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+const manifesto = document.getElementById('manifesto-text');
+const words = manifesto.textContent.trim().split(/\s+/);
+manifesto.innerHTML = words.map((w) => {
+  const isAccent = ['работают:', 'продают,', 'запоминаются.'].some(a => w.toLowerCase().includes(a.replace(/[:,]/g,'').toLowerCase()));
+  return `<span class="word${isAccent ? ' accent' : ''}">${w}</span>`;
+}).join(' ');
+
+const wordEls = manifesto.querySelectorAll('.word');
+const manifestoSection = document.getElementById('manifesto');
+
+function updateManifesto() {
+  const rect = manifestoSection.getBoundingClientRect();
+  const vh = window.innerHeight;
+  const progress = Math.max(0, Math.min(1, (vh - rect.top) / (vh + rect.height)));
+  const activeCount = Math.floor(progress * wordEls.length * 1.3);
+  wordEls.forEach((el, i) => el.classList.toggle('active', i < activeCount));
+}
+window.addEventListener('scroll', updateManifesto);
+updateManifesto();
+
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const el = e.target;
+      const target = +el.dataset.target;
+      let current = 0;
+      const step = target / 60;
+      const timer = setInterval(() => {
+        current += step;
+        if (current >= target) { current = target; clearInterval(timer); }
+        el.textContent = Math.floor(current);
+      }, 20);
+      counterObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.number-value').forEach(el => counterObserver.observe(el));
+
+const cube = document.getElementById('cube');
+let cubeRotX = 0, cubeRotY = 0, cubeTargetX = 0, cubeTargetY = 0;
+let cubeAuto = 0;
+
+if (cube) {
+  document.addEventListener('mousemove', (e) => {
+    cubeTargetX = (e.clientY / window.innerHeight - 0.5) * 30;
+    cubeTargetY = (e.clientX / window.innerWidth - 0.5) * 30;
+  });
+
+  function animateCube() {
+    cubeAuto += 0.15;
+    cubeRotX += (cubeTargetX - cubeRotX) * 0.06;
+    cubeRotY += (cubeTargetY - cubeRotY) * 0.06;
+    cube.style.transform = `rotateX(${cubeRotX + Math.sin(cubeAuto * 0.01) * 10}deg) rotateY(${cubeRotY + cubeAuto}deg)`;
+    requestAnimationFrame(animateCube);
+  }
+  animateCube();
+}
+</script>
 
 </body>
 </html>
