@@ -3,782 +3,754 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IGNAT — Digital Craftsman</title>
+<title>Игнат — Разработка сайтов под ключ</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=JetBrains+Mono:wght@300;400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #050505;
-    --fg: #f5f5f5;
-    --dim: #6b6b6b;
-    --accent: #e8d5b7;
-    --line: rgba(255,255,255,0.08);
+    --bg: #0a0b0f;
+    --bg2: #0f1117;
+    --glass: rgba(255, 255, 255, 0.04);
+    --glass-hover: rgba(255, 255, 255, 0.065);
+    --line: rgba(255, 255, 255, 0.09);
+    --line-hover: rgba(212, 175, 122, 0.4);
+    --fg: #f4f5f7;
+    --dim: #8a8f99;
+    --accent: #d4af7a;
+    --accent-bright: #e8cfa0;
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-slow: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  html { scroll-behavior: auto; }
+  html { scroll-behavior: smooth; }
+
   body {
     background: var(--bg);
     color: var(--fg);
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.65;
     overflow-x: hidden;
-    cursor: none;
     -webkit-font-smoothing: antialiased;
-    transition: opacity 1s ease;
+    letter-spacing: -0.005em;
   }
-  body.loading { overflow: hidden; opacity: 0; }
-  body.ready { opacity: 1; }
 
-  #smooth-wrapper { position: fixed; inset: 0; overflow: hidden; }
-  #smooth-content { position: absolute; top: 0; left: 0; width: 100%; will-change: transform; }
+  /* Многослойный фон — градиенты + сетка */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background:
+      radial-gradient(circle at 15% 15%, rgba(212,175,122,0.09), transparent 50%),
+      radial-gradient(circle at 85% 70%, rgba(120,130,180,0.06), transparent 55%),
+      radial-gradient(circle at 50% 50%, rgba(255,255,255,0.012), transparent 65%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+  }
 
-  .cursor, .cursor-dot {
-    position: fixed; pointer-events: none; z-index: 9999;
-    top: 0; left: 0; mix-blend-mode: difference;
-  }
-  .cursor {
-    width: 40px; height: 40px;
-    border: 1px solid #fff; border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.7s var(--ease),
-                height 0.7s var(--ease),
-                background 0.7s var(--ease),
-                border-color 0.7s var(--ease);
-    will-change: transform, width, height;
-  }
-  .cursor-dot {
-    width: 5px; height: 5px; background: #fff;
-    border-radius: 50%; transform: translate(-50%, -50%);
-    transition: width 0.6s var(--ease), height 0.6s var(--ease);
-  }
-  .cursor.hover { width: 90px; height: 90px; background: rgba(232,213,183,0.12); border-color: var(--accent); }
-  .cursor.magnetic { width: 120px; height: 120px; background: rgba(232,213,183,0.08); border-color: var(--accent); }
-
-  .preloader {
-    position: fixed; inset: 0; background: #000; z-index: 10000;
-    display: flex; align-items: center; justify-content: center;
-    transition: opacity 1s ease, visibility 1s ease;
-  }
-  .preloader.hide { opacity: 0; visibility: hidden; }
-  .preloader-text {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px; letter-spacing: 0.3em;
-    color: var(--dim); text-transform: uppercase;
-  }
-  .preloader-text span { color: var(--fg); }
-
-  #bg-canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.7; }
-
-  nav {
-    position: fixed; top: 0; left: 0; right: 0;
-    padding: 32px 48px;
-    display: flex; justify-content: space-between; align-items: center;
-    z-index: 100; mix-blend-mode: difference;
-  }
-  .logo {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px; letter-spacing: 0.2em; font-weight: 500;
-  }
-  .logo::before { content: '● '; color: var(--accent); }
-  .nav-links {
-    display: flex; gap: 40px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
-  }
-  .nav-links a { color: var(--fg); text-decoration: none; position: relative; padding: 4px 0; }
-  .nav-links a::after {
-    content: ''; position: absolute; bottom: 0; left: 0;
-    width: 0; height: 1px; background: var(--fg);
-    transition: width 0.7s var(--ease);
-  }
-  .nav-links a:hover::after { width: 100%; }
-
-  section { padding: 160px 48px; position: relative; }
-
-  .section-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px; letter-spacing: 0.3em;
-    text-transform: uppercase; color: var(--accent);
-    margin-bottom: 60px; display: flex; align-items: center; gap: 16px;
-  }
-  .section-label::before { content: ''; width: 30px; height: 1px; background: var(--accent); }
-
-  .hero {
-    min-height: 100vh;
-    padding: 140px 48px 60px;
-    display: flex; flex-direction: column; justify-content: space-between;
-    position: relative;
-  }
-  .hero-top {
-    display: flex; justify-content: space-between;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--dim);
-  }
-  .hero-title {
-    font-size: clamp(60px, 12vw, 200px);
-    font-weight: 300; line-height: 0.9;
-    letter-spacing: -0.04em; margin: 40px 0;
-    position: relative; z-index: 2;
-  }
-  .hero-title .line { display: block; overflow: hidden; }
-  .hero-title .line span {
-    display: inline-block; transform: translateY(110%);
-    animation: revealUp 1.4s var(--ease) forwards;
-  }
-  .hero-title .line:nth-child(2) span { animation-delay: 0.1s; }
-  .hero-title .line:nth-child(3) span { animation-delay: 0.2s; }
-  .hero-title .italic { font-style: italic; font-weight: 400; color: var(--accent); }
-  @keyframes revealUp { to { transform: translateY(0); } }
-
-  .hero-bottom {
-    display: flex; justify-content: space-between; align-items: flex-end;
-    gap: 40px; position: relative; z-index: 2;
-  }
-  .hero-desc { max-width: 420px; font-size: 15px; line-height: 1.6; color: var(--dim); }
-  .hero-desc strong { color: var(--fg); font-weight: 400; }
-
-  .scroll-hint {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
-    color: var(--dim); display: flex; align-items: center; gap: 12px;
-    animation: pulse 3s ease-in-out infinite;
-  }
-  .scroll-hint::after { content: ''; width: 40px; height: 1px; background: var(--dim); }
-  @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
-
-  .cube-wrap {
-    position: absolute;
-    top: 50%; right: 6%;
-    width: 260px; height: 260px;
-    transform: translateY(-50%);
-    perspective: 1000px;
-    z-index: 1;
+  /* Тонкая сетка поверх фона */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, black 30%, transparent 80%);
     pointer-events: none;
   }
-  .cube {
-    width: 100%; height: 100%;
-    position: relative;
-    transform-style: preserve-3d;
-  }
-  .cube-face {
-    position: absolute;
-    width: 260px; height: 260px;
-    border: 1px solid rgba(232,213,183,0.35);
-    background: rgba(232,213,183,0.02);
-    backdrop-filter: blur(6px);
-    box-shadow: inset 0 0 40px rgba(232,213,183,0.05);
-  }
-  .cube-face:nth-child(1) { transform: translateZ(130px); }
-  .cube-face:nth-child(2) { transform: rotateY(180deg) translateZ(130px); }
-  .cube-face:nth-child(3) { transform: rotateY(90deg) translateZ(130px); }
-  .cube-face:nth-child(4) { transform: rotateY(-90deg) translateZ(130px); }
-  .cube-face:nth-child(5) { transform: rotateX(90deg) translateZ(130px); }
-  .cube-face:nth-child(6) { transform: rotateX(-90deg) translateZ(130px); }
-  @media (max-width: 900px) { .cube-wrap { display: none; } }
 
-  .manifesto-text {
-    font-size: clamp(24px, 3.4vw, 52px);
-    font-weight: 300; line-height: 1.25;
-    letter-spacing: -0.02em; max-width: 1200px;
-  }
-  .manifesto-text .word {
-    display: inline-block; opacity: 0.15;
-    transition: opacity 0.9s var(--ease), color 0.9s var(--ease);
-  }
-  .manifesto-text .word.active { opacity: 1; }
-  .manifesto-text .word.accent { color: var(--accent); }
+  .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 
-  .about-text {
-    margin-top: 60px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 40px;
-    max-width: 1200px;
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 22px 0;
+    background: rgba(10, 11, 15, 0.65);
+    backdrop-filter: blur(30px) saturate(160%);
+    -webkit-backdrop-filter: blur(30px) saturate(160%);
+    border-bottom: 1px solid var(--line);
   }
-  .about-text p { color: var(--dim); font-size: 16px; line-height: 1.7; }
-  .about-text p strong { color: var(--fg); font-weight: 400; }
-
-  .services-header {
-    display: flex; justify-content: space-between; align-items: baseline;
-    margin-bottom: 80px; flex-wrap: wrap; gap: 20px;
-  }
-  .services-title {
-    font-size: clamp(48px, 7vw, 110px);
-    font-weight: 300; letter-spacing: -0.03em; line-height: 1;
-  }
-  .services-title em { font-style: italic; color: var(--accent); }
-  .services-count {
+  .nav-inner { display: flex; justify-content: space-between; align-items: center; }
+  .logo {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 12px; letter-spacing: 0.2em; color: var(--dim);
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+  .logo::before { content: '● '; color: var(--accent); }
+  .nav-links { display: flex; gap: 36px; }
+  .nav-links a {
+    color: var(--dim);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+    transition: color 0.5s var(--ease);
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: width 0.6s var(--ease);
+  }
+  .nav-links a:hover { color: var(--fg); }
+  .nav-links a:hover::after { width: 100%; }
+
+  /* SECTIONS */
+  section { padding: 110px 0; position: relative; }
+
+  h2 {
+    font-size: clamp(34px, 4.2vw, 56px);
+    font-weight: 600;
+    letter-spacing: -0.028em;
+    line-height: 1.12;
+    margin-bottom: 18px;
+  }
+  h2 em {
+    font-style: normal;
+    background: linear-gradient(120deg, var(--accent-bright) 0%, var(--accent) 50%, #b89462 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-  .services-list { display: flex; flex-direction: column; }
+  .sub {
+    color: var(--dim);
+    font-size: 17px;
+    margin-bottom: 60px;
+    max-width: 640px;
+    line-height: 1.65;
+  }
 
-  .service-item {
-    position: relative;
-    padding: 40px 0;
-    border-top: 1px solid var(--line);
-    cursor: pointer;
-    display: grid;
-    grid-template-columns: 80px 1fr auto auto;
+  .section-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 22px;
+    display: inline-flex;
     align-items: center;
-    gap: 40px;
-    transition: padding 1.2s var(--ease), border-color 1.2s var(--ease);
+    gap: 12px;
+  }
+  .section-tag::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  /* HERO */
+  .hero { padding: 130px 0 110px; }
+  .hero h1 {
+    font-size: clamp(42px, 6vw, 80px);
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    margin-bottom: 30px;
+    max-width: 920px;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(120deg, #f5e9d5 0%, var(--accent) 45%, #b89462 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p {
+    color: var(--dim);
+    font-size: 19px;
+    max-width: 620px;
+    margin-bottom: 44px;
+    line-height: 1.6;
+  }
+  .hero-buttons { display: flex; gap: 18px; flex-wrap: wrap; }
+
+  /* СТЕКЛО — ПРЕМИУМ */
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(44px) saturate(180%);
+    -webkit-backdrop-filter: blur(44px) saturate(180%);
+    border: 1px solid var(--line);
+    box-shadow:
+      0 24px 60px rgba(0, 0, 0, 0.5),
+      0 2px 8px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.11),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.02);
+    position: relative;
+    overflow: hidden;
+    transition: all 1.1s var(--ease);
+  }
+
+  /* Золотая светящаяся линия сверху */
+  .glass::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 15%; right: 15%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,175,122,0.6), transparent);
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Мягкий блик на карточке */
+  .glass::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.04), transparent 45%);
+    opacity: 0;
+    transition: opacity 1.2s var(--ease);
+    pointer-events: none;
+  }
+  .glass:hover::after { opacity: 1; }
+
+  /* КНОПКИ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 17px 38px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.005em;
+    color: var(--fg);
+    background: var(--glass);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    box-shadow:
+      0 14px 32px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.09);
+    transition: all 1s var(--ease);
+    will-change: transform;
+    position: relative;
     overflow: hidden;
   }
-  .service-item:last-child { border-bottom: 1px solid var(--line); }
-  .service-item:hover {
-    padding-left: 30px;
-    border-color: rgba(232,213,183,0.25);
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    opacity: 0.6;
   }
-  .service-item::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(90deg, rgba(232,213,183,0.06), transparent 60%);
-    transform: translateX(-100%);
-    transition: transform 1.4s var(--ease);
+  .btn:hover {
+    background: var(--glass-hover);
+    border-color: var(--line-hover);
+    transform: translateY(-4px);
+    box-shadow:
+      0 24px 60px rgba(0,0,0,0.55),
+      0 0 40px rgba(212,175,122,0.18),
+      inset 0 1px 0 rgba(255,255,255,0.18);
   }
-  .service-item:hover::before { transform: translateX(0); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #f0dfc2 0%, var(--accent) 50%, #b89462 100%);
+    color: #0a0b0f;
+    border: 1px solid rgba(240,223,194,0.55);
+    font-weight: 600;
+    box-shadow:
+      0 14px 36px rgba(212,175,122,0.28),
+      0 0 0 1px rgba(212,175,122,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .btn-primary::before {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent);
+    opacity: 0.9;
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #f7ecd6 0%, #e0bc86 50%, #c49f6d 100%);
+    box-shadow:
+      0 24px 60px rgba(212,175,122,0.4),
+      0 0 0 1px rgba(212,175,122,0.2),
+      inset 0 1px 0 rgba(255,255,255,0.75);
+  }
+
+  /* ABOUT */
+  .about-card {
+    padding: 60px 56px;
+    border-radius: 52px;
+  }
+  .about-card p {
+    color: rgba(255,255,255,0.78);
+    font-size: 17px;
+    margin-bottom: 20px;
+    line-height: 1.75;
+    position: relative;
+    z-index: 2;
+  }
+  .about-card p:last-child { margin-bottom: 0; }
+  .about-card strong { color: var(--fg); font-weight: 500; }
+
+  /* SERVICES */
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+  }
+
+  .service {
+    padding: 46px 40px;
+    border-radius: 48px;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .service .service-num,
+  .service .service-body,
+  .service .service-price { position: relative; z-index: 2; }
 
   .service-num {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 12px; color: var(--dim);
-    position: relative;
-    transition: color 0.9s var(--ease);
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    color: var(--dim);
+    margin-bottom: 24px;
+    transition: color 1s var(--ease);
   }
-  .service-item:hover .service-num { color: var(--accent); }
+  .service:hover .service-num { color: var(--accent); }
 
-  .service-name {
-    font-size: clamp(24px, 3vw, 44px);
-    font-weight: 300; letter-spacing: -0.02em;
-    position: relative;
-    transition: color 1.2s var(--ease), transform 1.2s var(--ease);
+  .service-body h3 {
+    font-size: 23px;
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    margin-bottom: 12px;
+    transition: color 1s var(--ease), transform 1s var(--ease);
   }
-  .service-item:hover .service-name {
-    color: var(--accent);
-    transform: translateX(8px);
+  .service:hover .service-body h3 {
+    color: var(--accent-bright);
+    transform: translateX(5px);
   }
-
-  .service-desc {
-    font-size: 14px; color: var(--dim);
-    max-width: 320px; position: relative;
-    transition: color 1.2s var(--ease);
+  .service-body p {
+    color: var(--dim);
+    font-size: 15px;
+    margin-bottom: 28px;
+    line-height: 1.6;
   }
-  .service-item:hover .service-desc { color: rgba(255,255,255,0.85); }
 
   .service-price {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 14px; color: var(--fg);
-    position: relative; white-space: nowrap;
-    transition: transform 1.2s var(--ease), color 1.2s var(--ease);
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    transition: color 1s var(--ease), transform 1s var(--ease);
   }
-  .service-item:hover .service-price {
-    color: var(--accent);
-    transform: translateX(-8px);
+  .service:hover .service-price {
+    color: var(--accent-bright);
+    transform: translateX(5px);
   }
 
-  .inc-list {
-    max-width: 900px;
+  /* INCLUDED */
+  .inc-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
   }
   .inc-item {
-    display: flex; align-items: flex-start; gap: 16px;
-    padding: 22px 26px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    transition: background 1.2s var(--ease),
-                border-color 1.2s var(--ease),
-                transform 1.2s var(--ease),
-                padding 1.2s var(--ease);
+    display: flex;
+    gap: 18px;
+    padding: 28px 30px;
+    border-radius: 34px;
   }
   .inc-item:hover {
-    background: rgba(232,213,183,0.04);
-    border-color: rgba(232,213,183,0.2);
-    transform: translateX(8px);
-    padding-left: 34px;
+    background: rgba(212,175,122,0.05);
+    border-color: var(--line-hover);
+    transform: translateY(-5px);
+    box-shadow:
+      0 24px 50px rgba(0,0,0,0.5),
+      0 0 30px rgba(212,175,122,0.1);
   }
   .inc-check {
-    flex-shrink: 0; width: 24px; height: 24px;
+    flex-shrink: 0;
+    width: 28px; height: 28px;
     border-radius: 50%;
-    border: 1px solid var(--accent);
+    background: rgba(212,175,122,0.1);
+    border: 1px solid rgba(212,175,122,0.35);
     display: flex; align-items: center; justify-content: center;
-    color: var(--accent); font-size: 12px;
-    transition: background 1.2s var(--ease), color 1.2s var(--ease);
+    color: var(--accent);
+    font-size: 12px;
+    transition: all 1s var(--ease);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+    position: relative;
+    z-index: 2;
   }
   .inc-item:hover .inc-check {
-    background: var(--accent);
-    color: var(--bg);
+    background: linear-gradient(135deg, #f0dfc2, var(--accent));
+    color: #0a0b0f;
+    transform: rotate(360deg) scale(1.12);
+    box-shadow: 0 0 28px rgba(212,175,122,0.6);
   }
-  .inc-item p { color: rgba(255,255,255,0.75); font-size: 15px; }
-  .inc-item p strong { color: var(--fg); font-weight: 400; }
+  .inc-item p {
+    color: rgba(255,255,255,0.78);
+    font-size: 15px;
+    line-height: 1.6;
+    position: relative;
+    z-index: 2;
+  }
+  .inc-item p strong { color: var(--fg); font-weight: 500; }
 
-  .faq { max-width: 900px; display: grid; gap: 14px; }
+  /* NUMBERS */
+  .numbers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 28px;
+    padding: 60px 48px;
+    border-radius: 52px;
+  }
+  .number-item {
+    transition: transform 1s var(--ease);
+    position: relative;
+    z-index: 2;
+  }
+  .number-item:hover { transform: translateY(-5px); }
+  .number-value {
+    font-size: clamp(42px, 5.2vw, 68px);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(120deg, #f5e9d5 0%, var(--accent) 60%, #b89462 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .number-label {
+    font-size: 14px;
+    color: var(--dim);
+    margin-top: 14px;
+    letter-spacing: 0.005em;
+  }
+
+  /* FAQ */
+  .faq { display: flex; flex-direction: column; gap: 18px; }
   .faq-item {
-    padding: 26px 30px;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    background: rgba(255,255,255,0.02);
-    transition: background 1.2s var(--ease),
-                border-color 1.2s var(--ease),
-                padding 1.2s var(--ease);
+    padding: 34px 40px;
+    border-radius: 38px;
     cursor: pointer;
   }
   .faq-item:hover {
-    background: rgba(232,213,183,0.04);
-    border-color: rgba(232,213,183,0.25);
-    padding-left: 44px;
+    background: var(--glass-hover);
+    border-color: var(--line-hover);
+    transform: translateX(8px);
+    box-shadow:
+      0 24px 50px rgba(0,0,0,0.5),
+      0 0 30px rgba(212,175,122,0.1);
   }
-  .faq-item h4 {
-    font-size: 17px; margin-bottom: 12px; font-weight: 400;
+  .faq-item h3 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
     transition: color 1s var(--ease);
+    position: relative;
+    z-index: 2;
   }
-  .faq-item:hover h4 { color: var(--accent); }
-  .faq-item p { color: var(--dim); font-size: 15px; line-height: 1.6; }
-
-  .numbers {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 60px;
-    border-top: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    padding: 100px 0;
-  }
-  .number-value {
-    font-size: clamp(48px, 6vw, 96px);
-    font-weight: 300; letter-spacing: -0.04em;
-    color: var(--accent); line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  .number-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
-    color: var(--dim); margin-top: 16px;
-  }
-
-  .cta { text-align: center; padding: 200px 48px; position: relative; }
-  .cta-title {
-    font-size: clamp(60px, 12vw, 200px);
-    font-weight: 300; line-height: 0.9;
-    letter-spacing: -0.04em; margin-bottom: 60px;
-  }
-  .cta-title em { font-style: italic; color: var(--accent); }
-  .cta-buttons { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
-
-  .btn {
-    display: inline-flex; align-items: center; gap: 12px;
-    padding: 22px 44px;
-    border: 1px solid var(--line); border-radius: 100px;
-    text-decoration: none; color: var(--fg);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase;
-    transition: transform 1.2s var(--ease),
-                background 1.2s var(--ease),
-                color 1.2s var(--ease),
-                border-color 1.2s var(--ease);
-    background: transparent;
-    will-change: transform;
-  }
-  .btn:hover { background: var(--fg); color: var(--bg); border-color: var(--fg); }
-  .btn-primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
-  .btn-primary:hover { background: var(--fg); border-color: var(--fg); }
-
-  footer {
-    padding: 60px 48px 40px;
-    border-top: 1px solid var(--line);
-    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 20px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  .faq-item:hover h3 { color: var(--accent-bright); }
+  .faq-item p {
     color: var(--dim);
+    font-size: 15px;
+    line-height: 1.7;
+    position: relative;
+    z-index: 2;
   }
 
-  .reveal {
-    opacity: 0; transform: translateY(60px);
-    transition: opacity 1.4s var(--ease), transform 1.4s var(--ease);
+  /* CTA */
+  .cta {
+    text-align: center;
+    padding: 130px 24px;
   }
-  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .cta h2 { margin-bottom: 22px; }
+  .cta p {
+    color: var(--dim);
+    font-size: 18px;
+    margin-bottom: 48px;
+  }
+  .cta-buttons {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 44px 0;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--dim);
+    letter-spacing: 0.005em;
+  }
+  footer .container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  /* REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(48px);
+    transition: opacity 1.3s var(--ease-slow), transform 1.3s var(--ease-slow);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 
   @media (max-width: 768px) {
-    body { cursor: auto; }
-    .cursor, .cursor-dot { display: none; }
-    nav { padding: 20px 24px; }
+    section { padding: 76px 0; }
+    .hero { padding: 76px 0 64px; }
     .nav-links { display: none; }
-    .hero, section, .cta { padding-left: 24px; padding-right: 24px; }
-    .hero { padding-top: 100px; }
-    .service-item { grid-template-columns: 40px 1fr; gap: 16px; }
-    .service-desc, .service-price { grid-column: 2; }
-    footer { padding: 40px 24px 30px; }
+    .about-card { padding: 36px; border-radius: 38px; }
+    .service { padding: 34px 30px; border-radius: 38px; }
+    .cta { padding: 86px 24px; }
+    .faq-item { padding: 26px 28px; border-radius: 30px; }
+    .inc-item { padding: 24px 26px; border-radius: 28px; }
+    .numbers { padding: 46px 30px; border-radius: 40px; }
+    .btn { border-radius: 40px; padding: 16px 32px; }
+    .hero-buttons, .cta-buttons { gap: 14px; }
   }
 </style>
 </head>
-<body class="loading">
-
-  <div class="cursor"></div>
-  <div class="cursor-dot"></div>
-
-  <div class="preloader" id="preloader">
-    <div class="preloader-text">Loading <span id="loadPct">0</span>%</div>
-  </div>
-
-  <canvas id="bg-canvas"></canvas>
+<body>
 
   <nav>
-    <div class="logo">IGNAT.K</div>
-    <div class="nav-links">
-      <a href="#manifesto">Обо мне</a>
-      <a href="#services">Услуги</a>
-      <a href="#faq">FAQ</a>
-      <a href="#contact">Контакт</a>
+    <div class="container nav-inner">
+      <div class="logo">IGNAT</div>
+      <div class="nav-links">
+        <a href="#about">Обо мне</a>
+        <a href="#services">Услуги</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact">Контакт</a>
+      </div>
     </div>
   </nav>
 
-  <div id="smooth-wrapper">
-   <div id="smooth-content">
-
   <section class="hero">
-    <div class="hero-top">
-      <span>Digital Craftsman / Est. 2025</span>
-      <span>Moscow · Remote</span>
-    </div>
-    <h1 class="hero-title">
-      <span class="line"><span>Сайты,</span></span>
-      <span class="line"><span>которые</span></span>
-      <span class="line"><span class="italic">продают.</span></span>
-    </h1>
-    <div class="cube-wrap">
-      <div class="cube" id="cube">
-        <div class="cube-face"></div>
-        <div class="cube-face"></div>
-        <div class="cube-face"></div>
-        <div class="cube-face"></div>
-        <div class="cube-face"></div>
-        <div class="cube-face"></div>
+    <div class="container">
+      <div class="section-tag reveal">Digital Craftsman · с 2025</div>
+      <h1 class="reveal">Сайты, которые <em>приносят клиентов</em></h1>
+      <p class="reveal">Делаю лендинги, визитки и интернет-магазины под ключ. Фиксированная цена, срок 3–7 дней, поддержка 30 дней после сдачи.</p>
+      <div class="hero-buttons reveal">
+        <a href="https://t.me/saiti45675328_bot" class="btn btn-primary">→ Написать боту</a>
+        <a href="https://t.me/saiti2026" class="btn">Telegram @saiti2026</a>
       </div>
-    </div>
-    <div class="hero-bottom">
-      <p class="hero-desc">
-        Разработка сайтов под ключ — <strong>лендинги, визитки, интернет-магазины</strong>.
-        Дизайн, вёрстка, тексты, подключение. Лично веду каждый проект.
-      </p>
-      <div class="scroll-hint">Scroll</div>
     </div>
   </section>
 
-  <section id="manifesto">
-    <div class="section-label">01 / Обо мне</div>
-    <p class="manifesto-text" id="manifesto-text">
-      Меня зовут Игнат. Я делаю сайты, которые работают: приносят заявки, продают, запоминаются. Без шаблонов, без воды, без «как у всех». Каждый проект веду лично — от идеи до запуска.
-    </p>
-    <div class="about-text">
-      <p>Начинал с простых визиток и лендингов, сейчас делаю <strong>интернет-магазины</strong> и корпоративные сайты. Работаю с дизайном, вёрсткой, текстами и подключением — вам не нужно искать отдельного дизайнера или копирайтера, всё делаю сам.</p>
-      <p>Каждый проект веду лично: обсуждаем задачу, согласовываем макет, делаю, показываю, сдаю. <strong>Никаких «менеджеров»</strong> и потерянных заявок. Если что-то непонятно — на связи в Telegram, отвечаю в течение часа.</p>
+  <section id="about">
+    <div class="container">
+      <div class="section-tag reveal">01 / Обо мне</div>
+      <h2 class="reveal">Кто будет делать <em>ваш сайт</em></h2>
+      <p class="sub reveal">Меня зовут Игнат. Я работаю с малым бизнесом и специалистами — помогаю получить работающий инструмент для привлечения клиентов.</p>
+      <div class="about-card glass reveal">
+        <p>Начинал с простых визиток и лендингов, сейчас делаю <strong>интернет-магазины</strong> и корпоративные сайты. Работаю с дизайном, вёрсткой, текстами и подключением — вам не нужно искать отдельного дизайнера или копирайтера, всё делаю сам.</p>
+        <p>Каждый проект веду лично: обсуждаем задачу, согласовываем макет, делаю, показываю, сдаю. <strong>Никаких «менеджеров»</strong> и потерянных заявок. Если что-то непонятно — на связи в Telegram, отвечаю в течение часа.</p>
+      </div>
     </div>
   </section>
 
   <section id="services">
-    <div class="section-label">02 / Услуги</div>
-    <div class="services-header">
-      <h2 class="services-title">Что я <em>делаю</em></h2>
-      <div class="services-count">[ 04 услуги ]</div>
+    <div class="container">
+      <div class="section-tag reveal">02 / Услуги</div>
+      <h2 class="reveal">Что я <em>делаю</em></h2>
+      <p class="sub reveal">Финальные цены — без скрытых доплат. Всё, что нужно для запуска, уже включено.</p>
+      <div class="services-grid">
+        <div class="service glass reveal" data-tilt>
+          <div class="service-num">01</div>
+          <div class="service-body">
+            <h3>Лендинг</h3>
+            <p>Продающая посадочная под услугу или товар. Дизайн, вёрстка, тексты.</p>
+          </div>
+          <div class="service-price">от 25 000 ₽</div>
+        </div>
+        <div class="service glass reveal" data-tilt>
+          <div class="service-num">02</div>
+          <div class="service-body">
+            <h3>Сайт-визитка</h3>
+            <p>Аккуратный сайт о компании или специалисте. 3–5 блоков, адаптив.</p>
+          </div>
+          <div class="service-price">от 15 000 ₽</div>
+        </div>
+        <div class="service glass reveal" data-tilt>
+          <div class="service-num">03</div>
+          <div class="service-body">
+            <h3>Интернет-магазин</h3>
+            <p>Каталог, корзина, оплата, админка. Под ключ с платежами.</p>
+          </div>
+          <div class="service-price">от 50 000 ₽</div>
+        </div>
+        <div class="service glass reveal" data-tilt>
+          <div class="service-num">04</div>
+          <div class="service-body">
+            <h3>Доработка</h3>
+            <p>Правки, ускорение, адаптив, починка чужого сайта.</p>
+          </div>
+          <div class="service-price">от 5 000 ₽</div>
+        </div>
+      </div>
     </div>
-    <div class="services-list">
-      <div class="service-item reveal">
-        <div class="service-num">01</div>
-        <div class="service-name">Лендинг</div>
-        <div class="service-desc">Продающая посадочная под услугу или товар. Дизайн, вёрстка, тексты.</div>
-        <div class="service-price">от 25 000 ₽</div>
-      </div>
-      <div class="service-item reveal">
-        <div class="service-num">02</div>
-        <div class="service-name">Сайт-визитка</div>
-        <div class="service-desc">Аккуратный сайт о компании или специалисте. 3–5 блоков, адаптив.</div>
-        <div class="service-price">от 15 000 ₽</div>
-      </div>
-      <div class="service-item reveal">
-        <div class="service-num">03</div>
-        <div class="service-name">Интернет-магазин</div>
-        <div class="service-desc">Каталог, корзина, оплата, админка. Под ключ с платежами.</div>
-        <div class="service-price">от 50 000 ₽</div>
-      </div>
-      <div class="service-item reveal">
-        <div class="service-num">04</div>
-        <div class="service-name">Доработка</div>
-        <div class="service-desc">Правки, ускорение, адаптив, починка чужого сайта.</div>
-        <div class="service-price">от 5 000 ₽</div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-tag reveal">03 / Что входит</div>
+      <h2 class="reveal">Всё <em>уже включено</em></h2>
+      <p class="sub reveal">Без доплат за «мелочи». Вот что входит в стоимость разработки.</p>
+      <div class="inc-grid">
+        <div class="inc-item glass reveal"><div class="inc-check">✓</div><p><strong>Дизайн</strong> — под ваш бизнес и аудиторию</p></div>
+        <div class="inc-item glass reveal"><div class="inc-check">✓</div><p><strong>Вёрстка и адаптив</strong> — на всех устройствах</p></div>
+        <div class="inc-item glass reveal"><div class="inc-check">✓</div><p><strong>Тексты</strong> — пишу сам, не «рыба»</p></div>
+        <div class="inc-item glass reveal"><div class="inc-check">✓</div><p><strong>Домен и хостинг</strong> — помогу настроить</p></div>
+        <div class="inc-item glass reveal"><div class="inc-check">✓</div><p><strong>Формы связи</strong> — Telegram, WhatsApp, почта</p></div>
+        <div class="inc-item glass reveal"><div class="inc-check">✓</div><p><strong>Базовое SEO</strong> — заголовки, мета-теги</p></div>
+        <div class="inc-item glass reveal"><div class="inc-check">✓</div><p><strong>Обучение</strong> — покажу админку</p></div>
+        <div class="inc-item glass reveal"><div class="inc-check">✓</div><p><strong>Поддержка 30 дней</strong> — правлю баги</p></div>
       </div>
     </div>
   </section>
 
   <section>
-    <div class="section-label">03 / Что входит</div>
-    <div class="services-header">
-      <h2 class="services-title">Всё <em>включено</em></h2>
-      <div class="services-count">[ 08 пунктов ]</div>
-    </div>
-    <div class="inc-list">
-      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Дизайн</strong> — под ваш бизнес и аудиторию, без шаблонов</p></div>
-      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Вёрстка и адаптив</strong> — на телефоне, планшете, компьютере</p></div>
-      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Тексты</strong> — пишу сам, не «рыба» из интернета</p></div>
-      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Домен и хостинг</strong> — помогу выбрать и настроить</p></div>
-      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Формы связи</strong> — Telegram, WhatsApp, почта, звонок</p></div>
-      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Базовое SEO</strong> — заголовки, мета-теги, скорость</p></div>
-      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Обучение</strong> — покажу, как пользоваться админкой</p></div>
-      <div class="inc-item reveal"><div class="inc-check">✓</div><p><strong>Поддержка 30 дней</strong> — правлю баги бесплатно</p></div>
-    </div>
-  </section>
-
-  <section>
-    <div class="numbers">
-      <div class="number-item">
-        <div class="number-value" data-target="20">0</div>
-        <div class="number-label">Проектов</div>
-      </div>
-      <div class="number-item">
-        <div class="number-value" data-target="7">0</div>
-        <div class="number-label">Дней макс. срок</div>
-      </div>
-      <div class="number-item">
-        <div class="number-value" data-target="30">0</div>
-        <div class="number-label">Дней поддержки</div>
-      </div>
-      <div class="number-item">
-        <div class="number-value" data-target="100">0</div>
-        <div class="number-label">% ручная работа</div>
+    <div class="container">
+      <div class="numbers glass reveal">
+        <div class="number-item">
+          <div class="number-value" data-target="20">0</div>
+          <div class="number-label">Проектов</div>
+        </div>
+        <div class="number-item">
+          <div class="number-value" data-target="7">0</div>
+          <div class="number-label">Дней макс. срок</div>
+        </div>
+        <div class="number-item">
+          <div class="number-value" data-target="30">0</div>
+          <div class="number-label">Дней поддержки</div>
+        </div>
+        <div class="number-item">
+          <div class="number-value" data-target="100">0</div>
+          <div class="number-label">% ручная работа</div>
+        </div>
       </div>
     </div>
   </section>
 
   <section id="faq">
-    <div class="section-label">04 / FAQ</div>
-    <div class="services-header">
-      <h2 class="services-title">Частые <em>вопросы</em></h2>
-    </div>
-    <div class="faq">
-      <div class="faq-item reveal"><h4>Сколько времени занимает разработка?</h4><p>Визитка — 2–3 дня. Лендинг — 3–5 дней. Интернет-магазин — от 7 дней. Точный срок называю после обсуждения задачи.</p></div>
-      <div class="faq-item reveal"><h4>Как проходит оплата?</h4><p>50% после согласования макета, 50% после сдачи готового сайта. Никакой предоплаты «в никуда».</p></div>
-      <div class="faq-item reveal"><h4>Что нужно от меня?</h4><p>Рассказать о задаче и бизнесе, дать материалы (логотип, фото, тексты — если есть). Остальное сделаю сам.</p></div>
-      <div class="faq-item reveal"><h4>Смогу ли я сам редактировать сайт?</h4><p>Да. Для простых сайтов ставлю удобную админку — сможете менять тексты, фото, цены без программиста.</p></div>
-      <div class="faq-item reveal"><h4>Что если сайт не понравится?</h4><p>Согласовываем макет до старта работ. Пока макет не утверждён — правки бесплатны и в любом количестве.</p></div>
-      <div class="faq-item reveal"><h4>Помогаете с доменом и хостингом?</h4><p>Да. Подскажу, что выбрать под ваш бюджет, помогу зарегистрировать и подключить. Обычно это 500–1500 ₽ в год за домен и 100–300 ₽/мес за хостинг.</p></div>
+    <div class="container">
+      <div class="section-tag reveal">04 / FAQ</div>
+      <h2 class="reveal">Частые <em>вопросы</em></h2>
+      <p class="sub reveal">Коротко о том, что обычно спрашивают до старта.</p>
+      <div class="faq">
+        <div class="faq-item glass reveal">
+          <h3>Сколько времени занимает разработка?</h3>
+          <p>Визитка — 2–3 дня. Лендинг — 3–5 дней. Интернет-магазин — от 7 дней. Точный срок называю после обсуждения задачи.</p>
+        </div>
+        <div class="faq-item glass reveal">
+          <h3>Как проходит оплата?</h3>
+          <p>50% после согласования макета, 50% после сдачи готового сайта. Никакой предоплаты «в никуда».</p>
+        </div>
+        <div class="faq-item glass reveal">
+          <h3>Что нужно от меня?</h3>
+          <p>Рассказать о задаче и бизнесе, дать материалы (логотип, фото, тексты — если есть). Остальное сделаю сам.</p>
+        </div>
+        <div class="faq-item glass reveal">
+          <h3>Смогу ли я сам редактировать сайт?</h3>
+          <p>Да. Для простых сайтов ставлю удобную админку — сможете менять тексты, фото, цены без программиста.</p>
+        </div>
+        <div class="faq-item glass reveal">
+          <h3>Что если сайт не понравится?</h3>
+          <p>Согласовываем макет до старта работ. Пока макет не утверждён — правки бесплатны и в любом количестве.</p>
+        </div>
+        <div class="faq-item glass reveal">
+          <h3>Помогаете с доменом и хостингом?</h3>
+          <p>Да. Подскажу, что выбрать под ваш бюджет, помогу зарегистрировать и подключить. Обычно это 500–1500 ₽ в год за домен и 100–300 ₽/мес за хостинг.</p>
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="cta" id="contact">
-    <h2 class="cta-title">Обсудим<br><em>проект?</em></h2>
-    <div class="cta-buttons">
-      <a href="https://t.me/saiti45675328_bot" class="btn btn-primary" data-magnetic>→ Написать боту</a>
-      <a href="https://t.me/saiti2026" class="btn" data-magnetic>→ Telegram @saiti2026</a>
+    <div class="container">
+      <h2 class="reveal">Обсудим <em>проект?</em></h2>
+      <p class="reveal">Напишите удобным способом — отвечу в течение часа</p>
+      <div class="cta-buttons reveal">
+        <a href="https://t.me/saiti45675328_bot" class="btn btn-primary">→ Написать боту</a>
+        <a href="https://t.me/saiti2026" class="btn">Telegram @saiti2026</a>
+      </div>
     </div>
   </section>
 
   <footer>
-    <div>© 2025 Ignat K. — Digital Craftsman</div>
-    <div>Made with intent</div>
+    <div class="container">
+      <div>© 2025 Игнат — разработка сайтов</div>
+      <div>Сделано вручную</div>
+    </div>
   </footer>
 
-   </div>
-  </div>
-
 <script>
-let pct = 0;
-const pctEl = document.getElementById('loadPct');
-const preloader = document.getElementById('preloader');
-const body = document.body;
-const interval = setInterval(() => {
-  pct += Math.random() * 15;
-  if (pct >= 100) {
-    pct = 100;
-    clearInterval(interval);
-    setTimeout(() => {
-      preloader.classList.add('hide');
-      body.classList.remove('loading');
-      body.classList.add('ready');
-      initSmoothScroll();
-    }, 400);
-  }
-  pctEl.textContent = Math.floor(pct);
-}, 100);
-
-const cursor = document.querySelector('.cursor');
-const cursorDot = document.querySelector('.cursor-dot');
-let mx = 0, my = 0, cx = 0, cy = 0, dotX = 0, dotY = 0;
-
-document.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
-
-function animateCursor() {
-  cx += (mx - cx) * 0.12;
-  cy += (my - cy) * 0.12;
-  dotX += (mx - dotX) * 0.28;
-  dotY += (my - dotY) * 0.28;
-  cursor.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
-  cursorDot.style.transform = `translate(${dotX}px, ${dotY}px) translate(-50%, -50%)`;
-  requestAnimationFrame(animateCursor);
-}
-animateCursor();
-
-document.querySelectorAll('a, .service-item, .faq-item, .inc-item').forEach(el => {
-  el.addEventListener('mouseenter', () => {
-    cursor.classList.add('hover');
-    cursorDot.style.width = '12px';
-    cursorDot.style.height = '12px';
-  });
-  el.addEventListener('mouseleave', () => {
-    cursor.classList.remove('hover');
-    cursorDot.style.width = '5px';
-    cursorDot.style.height = '5px';
-  });
-});
-
-document.querySelectorAll('[data-magnetic]').forEach(btn => {
-  btn.addEventListener('mousemove', (e) => {
-    const rect = btn.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    btn.style.transform = `translate(${x * 0.25}px, ${y * 0.4}px)`;
-  });
-  btn.addEventListener('mouseleave', () => { btn.style.transform = ''; });
-  btn.addEventListener('mouseenter', () => cursor.classList.add('magnetic'));
-  btn.addEventListener('mouseleave', () => cursor.classList.remove('magnetic'));
-});
-
-let smoothScrollY = 0;
-let targetScrollY = 0;
-const smoothContent = document.getElementById('smooth-content');
-let contentHeight = 0;
-
-function recalcHeight() {
-  contentHeight = smoothContent.scrollHeight;
-  document.body.style.height = contentHeight + 'px';
-}
-
-function initSmoothScroll() {
-  recalcHeight();
-  window.addEventListener('resize', recalcHeight);
-  window.addEventListener('scroll', () => { targetScrollY = window.scrollY; }, { passive: true });
-  smoothLoop();
-}
-
-function smoothLoop() {
-  smoothScrollY += (targetScrollY - smoothScrollY) * 0.08;
-  if (Math.abs(targetScrollY - smoothScrollY) < 0.05) smoothScrollY = targetScrollY;
-  smoothContent.style.transform = `translate3d(0, ${-smoothScrollY}px, 0)`;
-  requestAnimationFrame(smoothLoop);
-}
-
-const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
-let particles = [];
-let W, H;
-
-function resize() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', resize);
-
-const PARTICLE_COUNT = window.innerWidth < 768 ? 30 : 80;
-for (let i = 0; i < PARTICLE_COUNT; i++) {
-  particles.push({
-    x: Math.random() * W, y: Math.random() * H,
-    vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25,
-    r: Math.random() * 1.4 + 0.3
-  });
-}
-
-function drawParticles() {
-  ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = 'rgba(232, 213, 183, 0.5)';
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
-  particles.forEach((p, i) => {
-    p.x += p.vx; p.y += p.vy;
-    if (p.x < 0 || p.x > W) p.vx *= -1;
-    if (p.y < 0 || p.y > H) p.vy *= -1;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fill();
-    for (let j = i + 1; j < particles.length; j++) {
-      const q = particles[j];
-      const dx = p.x - q.x, dy = p.y - q.y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < 110) {
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(q.x, q.y);
-        ctx.stroke();
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 70);
+        revealObserver.unobserve(e.target);
       }
-    }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const el = e.target;
+        const target = +el.dataset.target;
+        let current = 0;
+        const step = target / 60;
+        const timer = setInterval(() => {
+          current += step;
+          if (current >= target) { current = target; clearInterval(timer); }
+          el.textContent = Math.floor(current);
+        }, 20);
+        counterObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.number-value').forEach(el => counterObserver.observe(el));
+
+  document.querySelectorAll('[data-tilt]').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const rotX = ((y - centerY) / centerY) * -4;
+      const rotY = ((x - centerX) / centerX) * 4;
+      card.style.transform = `perspective(1000px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-8px)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
   });
-  requestAnimationFrame(drawParticles);
-}
-drawParticles();
-
-const manifesto = document.getElementById('manifesto-text');
-const words = manifesto.textContent.trim().split(/\s+/);
-manifesto.innerHTML = words.map((w) => {
-  const isAccent = ['работают:', 'продают,', 'запоминаются.'].some(a => w.toLowerCase().includes(a.replace(/[:,]/g,'').toLowerCase()));
-  return `<span class="word${isAccent ? ' accent' : ''}">${w}</span>`;
-}).join(' ');
-
-const wordEls = manifesto.querySelectorAll('.word');
-const manifestoSection = document.getElementById('manifesto');
-
-function updateManifesto() {
-  const rect = manifestoSection.getBoundingClientRect();
-  const vh = window.innerHeight;
-  const progress = Math.max(0, Math.min(1, (vh - rect.top) / (vh + rect.height)));
-  const activeCount = Math.floor(progress * wordEls.length * 1.3);
-  wordEls.forEach((el, i) => el.classList.toggle('active', i < activeCount));
-}
-window.addEventListener('scroll', updateManifesto);
-updateManifesto();
-
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.15 });
-document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
-
-const counterObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      const el = e.target;
-      const target = +el.dataset.target;
-      let current = 0;
-      const step = target / 60;
-      const timer = setInterval(() => {
-        current += step;
-        if (current >= target) { current = target; clearInterval(timer); }
-        el.textContent = Math.floor(current);
-      }, 20);
-      counterObserver.unobserve(el);
-    }
-  });
-}, { threshold: 0.5 });
-document.querySelectorAll('.number-value').forEach(el => counterObserver.observe(el));
-
-const cube = document.getElementById('cube');
-let cubeRotX = 0, cubeRotY = 0, cubeTargetX = 0, cubeTargetY = 0;
-let cubeAuto = 0;
-
-if (cube) {
-  document.addEventListener('mousemove', (e) => {
-    cubeTargetX = (e.clientY / window.innerHeight - 0.5) * 30;
-    cubeTargetY = (e.clientX / window.innerWidth - 0.5) * 30;
-  });
-
-  function animateCube() {
-    cubeAuto += 0.15;
-    cubeRotX += (cubeTargetX - cubeRotX) * 0.06;
-    cubeRotY += (cubeTargetY - cubeRotY) * 0.06;
-    cube.style.transform = `rotateX(${cubeRotX + Math.sin(cubeAuto * 0.01) * 10}deg) rotateY(${cubeRotY + cubeAuto}deg)`;
-    requestAnimationFrame(animateCube);
-  }
-  animateCube();
-}
 </script>
 
 </body>
